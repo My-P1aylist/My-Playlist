@@ -583,6 +583,11 @@
     border-radius:999px;padding:8px 14px;cursor:pointer;
   }
   .shuffle-btn:hover{background:var(--paper-dark);}
+  .shuffle-btn.active{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .shuffle-btn.active:hover{background:var(--ink);}
+  /* 反選模式：中文顯示在正面、原文顯示在背面時，字體樣式互換，維持原本的視覺主從關係 */
+  .card3d.reversed .face.front .word{font-family:'Noto Sans TC','Noto Sans KR',sans-serif;font-weight:500;font-size:17px;color:var(--green-dark);}
+  .card3d.reversed .face.back .word{font-family:'Inter','Noto Sans TC','Noto Sans KR',sans-serif;font-weight:900;font-size:26px;color:var(--ink);}
 
   .toast{
     position:fixed;bottom:20px;left:50%;transform:translateX(-50%);
@@ -616,9 +621,181 @@
     .logo-title{height:80px;max-width:60vw;object-fit:contain;}
     .stage{height:260px;}
   }
+
+  /* ====== 黑膠唱片試聽彈窗 ====== */
+  .vinyl-overlay{
+    position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.55);
+    display:flex;align-items:center;justify-content:center;padding:24px;
+    animation:vinylFadeIn 0.25s ease;
+  }
+  @keyframes vinylFadeIn{ from{opacity:0;} to{opacity:1;} }
+  .vinyl-box{
+    display:flex;flex-direction:column;align-items:center;gap:16px;
+  }
+  .vinyl-disc-wrap{
+    position:relative;width:220px;height:220px;
+  }
+  .vinyl-disc{
+    position:absolute;inset:0;border-radius:50%;
+    background:radial-gradient(circle at center, #222 0%, #222 22%, #111 23%, #111 100%);
+    box-shadow:0 10px 30px rgba(0,0,0,0.5);
+    animation:vinylSpin 3.5s linear infinite;
+    animation-play-state:paused;
+  }
+  .vinyl-disc.spinning{ animation-play-state:running; }
+  .vinyl-disc::before{
+    content:'';position:absolute;inset:0;border-radius:50%;
+    background:repeating-radial-gradient(circle at center, rgba(255,255,255,0.06) 0px, rgba(255,255,255,0.06) 1px, transparent 2px, transparent 6px);
+  }
+  .vinyl-cover{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:42%;height:42%;border-radius:50%;object-fit:cover;
+    box-shadow:0 0 0 4px #111, 0 0 0 5px rgba(255,255,255,0.15);
+  }
+  .vinyl-hole{
+    position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);
+    width:10px;height:10px;border-radius:50%;background:#000;
+    box-shadow:0 0 0 2px rgba(255,255,255,0.4);
+  }
+  @keyframes vinylSpin{ from{transform:rotate(0deg);} to{transform:rotate(360deg);} }
+  .vinyl-title{color:#fff;font-weight:700;font-size:15px;text-align:center;max-width:280px;}
+  .vinyl-artist{color:rgba(255,255,255,0.7);font-size:13px;text-align:center;max-width:280px;margin-top:-8px;}
+  .vinyl-progress{
+    width:220px;height:3px;border-radius:2px;background:rgba(255,255,255,0.2);overflow:hidden;
+  }
+  .vinyl-progress-bar{
+    height:100%;width:0%;background:var(--green-dark,#D06A82);transition:width 0.2s linear;
+  }
+  .vinyl-close{
+    background:rgba(255,255,255,0.15);color:#fff;border:none;border-radius:20px;
+    padding:8px 18px;font-size:13px;cursor:pointer;
+  }
+  /* ====== 停止分析按鍵（畫面正下方，分析歌詞時顯示）====== */
+  .stop-analysis-btn{
+    position:fixed;left:50%;bottom:24px;transform:translateX(-50%);z-index:10000;
+    display:none;align-items:center;justify-content:center;
+    background:var(--green-dark,#D06A82);color:#fff;border:none;border-radius:24px;
+    padding:12px 28px;font-size:14px;font-weight:700;cursor:pointer;
+    box-shadow:0 6px 18px rgba(0,0,0,0.3);
+  }
+  .stop-analysis-btn:active{ opacity:0.85; }
+  .stop-analysis-btn svg{ display:block; }
+  /* ====== 簡約 loading 動畫（建立專輯／搜尋歌詞等待中使用）====== */
+  @keyframes btnSpin{ to{ transform:rotate(360deg); } }
+  .btn-spinner{
+    display:inline-block; width:14px; height:14px; margin-right:8px;
+    border:2px solid rgba(255,255,255,0.4); border-top-color:#fff;
+    border-radius:50%; vertical-align:-2px;
+    animation:btnSpin 0.7s linear infinite;
+  }
+  .btn.is-loading{ opacity:0.85; cursor:default; pointer-events:none; }
+  .lyrics-status.is-loading{
+    display:flex; align-items:center; gap:8px;
+  }
+  .lyrics-status .status-spinner{
+    display:inline-block; width:14px; height:14px; flex:none;
+    border:2px solid rgba(0,0,0,0.12); border-top-color:var(--green-dark,#D06A82);
+    border-radius:50%;
+    animation:btnSpin 0.7s linear infinite;
+  }
+  /* 黑色主題下，單字卡背面（淺色底色）維持淺底，但文字改用黑色以確保對比度 */
+  .theme-dark .face.back .word,
+  .theme-dark .card3d.reversed .face.back .word{ color:#111; }
+
+  /* ====== 筆記頁面 ====== */
+  .notes-input-card{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:16px; margin-bottom:20px;
+  }
+  .notes-textarea{
+    width:100%; min-height:120px; resize:vertical;
+    font-family:'Noto Sans TC','Noto Sans KR',sans-serif; font-size:14px;
+    padding:11px 14px; border:1px solid var(--line); border-radius:8px;
+    background:var(--input-bg); color:var(--input-text); box-sizing:border-box;
+  }
+  .notes-input-actions{ display:flex; gap:10px; margin-top:12px; }
+  .notes-result-card{
+    background:var(--green-tint); border:1px solid var(--green); border-radius:12px;
+    padding:16px; margin-bottom:20px;
+  }
+  .notes-result-title{
+    font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--green-dark);
+    margin-bottom:10px; font-weight:700;
+  }
+  .theme-dark .notes-result-title{ color:#111; }
+  .notes-result-list{ display:flex; flex-direction:column; gap:10px; margin-bottom:4px; }
+  .notes-result-item{
+    display:flex; gap:10px; align-items:flex-start;
+    background:var(--card); border-radius:8px; padding:10px 12px;
+  }
+  .notes-result-item input[type=checkbox]{ margin-top:5px; flex-shrink:0; }
+  .nri-body{ flex:1; min-width:0; }
+  .nri-top-row{ display:flex; justify-content:space-between; align-items:center; gap:8px; margin-bottom:3px; }
+  .nri-phrase{
+    font-family:'Inter','Noto Sans TC','Noto Sans KR',sans-serif; font-weight:700;
+    font-size:14px; color:var(--ink);
+  }
+  .nri-cat-select{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; padding:3px 6px;
+    border:1px solid var(--line); border-radius:6px; background:var(--input-bg);
+    color:var(--input-text); flex-shrink:0; cursor:pointer;
+  }
+  .nri-meaning{ font-size:13px; color:var(--ink-soft); margin-bottom:3px; }
+  .nri-example{ font-size:12px; color:var(--muted); font-style:italic; word-break:break-word; }
+
+  /* 筆記本：三個小分頁（句尾變化／詞語／文法） */
+  .notebook{ margin-top:4px; }
+  .notebook-tabs{ display:flex; gap:6px; padding-left:6px; }
+  .notebook-tab{
+    border:1px solid var(--line); border-bottom:none;
+    background:var(--tab-color, var(--paper-dark)); color:#3a332c;
+    font-family:'IBM Plex Mono',monospace; font-size:12px; font-weight:600;
+    padding:9px 16px; border-radius:10px 10px 0 0; cursor:pointer;
+    position:relative; top:2px; opacity:0.72; transition:opacity 0.15s, top 0.15s;
+  }
+  .notebook-tab:hover{ opacity:0.9; }
+  .notebook-tab.active{ opacity:1; top:0; box-shadow:0 -3px 8px rgba(0,0,0,0.08); font-weight:700; }
+  .theme-dark .notebook-tab{ color:#111; }
+  .notebook-page{
+    background:var(--card); border:1px solid var(--line); border-radius:0 12px 12px 12px;
+    padding:16px; min-height:140px;
+  }
+  @keyframes notebookPageFlip{
+    0%{ transform:perspective(900px) rotateY(0deg); opacity:1; }
+    45%{ transform:perspective(900px) rotateY(-12deg); opacity:0.35; }
+    100%{ transform:perspective(900px) rotateY(0deg); opacity:1; }
+  }
+  .notebook-page.flipping{ animation:notebookPageFlip 0.36s ease; transform-origin:left center; }
+
+  .notes-list{ display:flex; flex-direction:column; gap:12px; }
+  .note-card{
+    background:var(--card); border:1px solid var(--line); border-radius:12px;
+    padding:14px 16px;
+  }
+  .note-card-header{
+    display:flex; align-items:center; gap:8px; flex-wrap:wrap; margin-bottom:6px;
+  }
+  .note-card-header .note-item-phrase{ flex:1; min-width:80px; }
+  .note-count-badge{
+    font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--green-dark);
+    background:var(--green-tint); border-radius:999px; padding:3px 10px; flex-shrink:0;
+  }
+  .theme-dark .note-count-badge{ color:#111; }
+  .note-delete-btn{
+    background:none; border:none; color:var(--rust); cursor:pointer;
+    font-size:12px; font-family:'IBM Plex Mono',monospace; flex-shrink:0;
+  }
+  .note-item-phrase{
+    font-family:'Inter','Noto Sans TC','Noto Sans KR',sans-serif; font-weight:700;
+    font-size:14px; color:var(--ink);
+  }
+  .note-item-meaning{ font-size:13px; color:var(--ink-soft); margin-top:2px; }
+  .note-item-example{ font-size:12px; color:var(--muted); font-style:italic; margin-top:2px; }
 </style>
 </head>
 <body>
+<button type="button" class="stop-analysis-btn" id="stopAnalysisBtn"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" style="margin-right:8px;"><rect x="5" y="5" width="14" height="14" rx="3"/></svg>停止分析</button>
+
 <div class="falling-stars">
   <div class="falling-star" style="left:6%;animation-duration:32s;animation-delay:0s;"><svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L14.9 8.6 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.6 Z"/></svg></div>
   <div class="falling-star" style="left:18%;animation-duration:40s;animation-delay:6s;"><svg width="7" height="7" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2 L14.9 8.6 L22 9.3 L16.5 14 L18.2 21 L12 17.3 L5.8 21 L7.5 14 L2 9.3 L9.1 8.6 Z"/></svg></div>
@@ -641,6 +818,7 @@
         <button id="tabManage" class="active">專輯</button>
         <button id="tabStudy">背誦</button>
         <button id="tabQuiz">測驗</button>
+        <button id="tabNotes">筆記</button>
       </div>
     </div>
   </header>
@@ -802,6 +980,7 @@
     <div class="study-scope" id="studyScope"></div>
     <div class="study-wrap">
       <div class="counter" id="counter"></div>
+      <button type="button" class="shuffle-btn" id="reverseStudyBtn" style="margin-bottom:14px;">⇄ 反選：中文優先</button>
       <div class="stage">
         <div class="card3d" id="card3d">
           <div class="face front">
@@ -871,6 +1050,38 @@
     </div>
   </div>
 
+  <!-- Notes panel -->
+  <div id="panelNotes" class="panel">
+    <div class="notes-input-card">
+      <textarea id="notesInputText" class="notes-textarea" rows="6" placeholder="貼上歌詞、貼文、對話…等文字，AI 會幫你拆解裡面的流行語／網路用語用法"></textarea>
+      <div class="notes-input-actions">
+        <button class="btn primary" id="notesAnalyzeBtn">分析並拆解流行語</button>
+      </div>
+      <div class="lyrics-status" id="notesAnalyzeStatus" style="display:none;"></div>
+    </div>
+
+    <div id="notesResultCard" class="notes-result-card" style="display:none;">
+      <div class="notes-result-title">拆解結果（勾選要存入筆記的項目）</div>
+      <div id="notesResultList" class="notes-result-list"></div>
+      <div class="notes-input-actions">
+        <button class="btn primary" id="notesSaveBtn">儲存至筆記</button>
+        <button class="btn text" id="notesDiscardBtn">捨棄</button>
+      </div>
+    </div>
+
+    <div class="notebook">
+      <div class="notebook-tabs">
+        <button class="notebook-tab active" data-cat="句尾變化" style="--tab-color:#F6C9D0;">句尾變化</button>
+        <button class="notebook-tab" data-cat="詞語" style="--tab-color:#C7DFF5;">詞語</button>
+        <button class="notebook-tab" data-cat="文法" style="--tab-color:#D2ECC5;">文法</button>
+      </div>
+      <div class="notebook-page" id="notebookPage">
+        <div id="notesList" class="notes-list"></div>
+        <div id="emptyNotes" class="empty" style="display:none;">這個分類還沒有筆記，分析一段文字看看吧。</div>
+      </div>
+    </div>
+  </div>
+
   <footer class="site-footer">
     © 2026 YK. All rights reserved
     <div class="site-disclaimer">For personal, non-commercial educational use only. Song previews via iTunes (Apple); all content belongs to its respective owners.</div>
@@ -895,6 +1106,7 @@ const STORAGE_KEY = 'flashcards_v1';
 const POINTS_KEY = 'flashcards_points_v1';
 const PURCHASES_KEY = 'flashcards_purchases_v1';
 const ALBUMS_KEY = 'flashcard_albums_v1';
+const NOTES_KEY = 'flashcards_notes_v2';
 const UNCAT = '__uncategorized__';
 const hasCloud = !!(window.storage && window.storage.get && window.storage.set);
 
@@ -936,6 +1148,27 @@ async function saveAlbums(albums){
       await window.storage.set(ALBUMS_KEY, JSON.stringify(albums));
     }else{
       localStorage.setItem(ALBUMS_KEY, JSON.stringify(albums));
+    }
+    return true;
+  }catch(e){ return false; }
+}
+async function loadNotes(){
+  try{
+    if(hasCloud){
+      const r = await window.storage.get(NOTES_KEY);
+      return r && r.value ? JSON.parse(r.value) : [];
+    }else{
+      const raw = localStorage.getItem(NOTES_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+  }catch(e){ return []; }
+}
+async function saveNotes(notes){
+  try{
+    if(hasCloud){
+      await window.storage.set(NOTES_KEY, JSON.stringify(notes));
+    }else{
+      localStorage.setItem(NOTES_KEY, JSON.stringify(notes));
     }
     return true;
   }catch(e){ return false; }
@@ -1091,6 +1324,7 @@ function cardAlbumId(c){ return c.albumId || UNCAT; }
 
 let cards = [];
 let albums = [];
+let notes = [];
 let currentAlbumId = null;
 let inAlbumView = false;
 let deleteMode = false;
@@ -1100,6 +1334,8 @@ let studyOrder = [];
 let studyIndex = 0;
 let flipped = false;
 let studyAlbumFilter = null;
+const REVERSE_STUDY_KEY = 'flashcards_reverse_study_v1';
+let studyReversed = localStorage.getItem(REVERSE_STUDY_KEY) === '1';
 
 const libraryView = document.getElementById('libraryView');
 const albumDetailView = document.getElementById('albumDetailView');
@@ -1208,6 +1444,21 @@ function showToast(msg){
   toast.textContent = msg;
   toast.classList.add('show');
   setTimeout(()=>toast.classList.remove('show'), 1600);
+}
+
+// ---- 簡約 loading 動畫小工具：按鈕在等待中顯示轉圈圈 spinner ----
+function setBtnLoading(btn, loadingText){
+  if(!btn) return;
+  if(btn.dataset.originalText === undefined) btn.dataset.originalText = btn.textContent;
+  btn.disabled = true;
+  btn.classList.add('is-loading');
+  btn.innerHTML = `<span class="btn-spinner"></span>${loadingText || btn.dataset.originalText}`;
+}
+function clearBtnLoading(btn){
+  if(!btn) return;
+  btn.disabled = false;
+  btn.classList.remove('is-loading');
+  if(btn.dataset.originalText !== undefined) btn.textContent = btn.dataset.originalText;
 }
 
 function showConfirm(message){
@@ -1707,12 +1958,14 @@ function escapeHtml(s){
 const tabManage = document.getElementById('tabManage');
 const tabStudy = document.getElementById('tabStudy');
 const tabQuiz = document.getElementById('tabQuiz');
+const tabNotes = document.getElementById('tabNotes');
 const panelManage = document.getElementById('panelManage');
 const panelStudy = document.getElementById('panelStudy');
 const panelQuiz = document.getElementById('panelQuiz');
+const panelNotes = document.getElementById('panelNotes');
 function setActiveTab(tab){
-  [tabManage, tabStudy, tabQuiz].forEach(t=>t.classList.remove('active'));
-  [panelManage, panelStudy, panelQuiz].forEach(p=>p.classList.remove('active'));
+  [tabManage, tabStudy, tabQuiz, tabNotes].forEach(t=>t.classList.remove('active'));
+  [panelManage, panelStudy, panelQuiz, panelNotes].forEach(p=>p.classList.remove('active'));
   tab.classList.add('active');
 }
 function goHome(){
@@ -1733,6 +1986,11 @@ tabQuiz.addEventListener('click', ()=>{
   setActiveTab(tabQuiz);
   panelQuiz.classList.add('active');
   startQuiz();
+});
+tabNotes.addEventListener('click', ()=>{
+  setActiveTab(tabNotes);
+  panelNotes.classList.add('active');
+  renderNotes();
 });
 
 /* ---- Study ---- */
@@ -1815,9 +2073,15 @@ function renderStudy(){
   const c = cards.find(x=>x.id===studyOrder[studyIndex]) || pool[0];
   flipped = false;
   card3d.classList.remove('flipped');
+  card3d.classList.toggle('reversed', studyReversed);
   counterEl.textContent = `${studyIndex+1} / ${studyOrder.length}`;
-  studyFront.innerHTML = renderFrontHTMLBlock(c.front);
-  studyBack.textContent = c.back || '（尚未填寫背面內容）';
+  if(studyReversed){
+    studyFront.textContent = c.back || '（尚未填寫背面內容）';
+    studyBack.innerHTML = renderFrontHTMLBlock(c.front);
+  }else{
+    studyFront.innerHTML = renderFrontHTMLBlock(c.front);
+    studyBack.textContent = c.back || '（尚未填寫背面內容）';
+  }
   currentStudyWord = splitFrontBase(c.front).main;
   if(c.image){
     studyImgFront.src = c.image;
@@ -1830,6 +2094,18 @@ card3d.addEventListener('click', (e)=>{
   if(e.target.closest('.study-speak-btn')) return;
   flipped = !flipped;
   card3d.classList.toggle('flipped', flipped);
+});
+const reverseStudyBtn = document.getElementById('reverseStudyBtn');
+function updateReverseStudyBtnUI(){
+  reverseStudyBtn.classList.toggle('active', studyReversed);
+  reverseStudyBtn.textContent = studyReversed ? '⇄ 反選中：中文優先' : '⇄ 反選：中文優先';
+}
+updateReverseStudyBtnUI();
+reverseStudyBtn.addEventListener('click', ()=>{
+  studyReversed = !studyReversed;
+  localStorage.setItem(REVERSE_STUDY_KEY, studyReversed ? '1' : '0');
+  updateReverseStudyBtnUI();
+  renderStudy();
 });
 document.getElementById('prevBtn').addEventListener('click', (e)=>{
   if(!studyOrder.length) return;
@@ -2373,10 +2649,97 @@ function renderSongCandidates(results){
       songCandidateList.querySelectorAll('.song-candidate-item').forEach(el=>el.classList.remove('selected'));
       item.classList.add('selected');
       songCandidateList.innerHTML = '';
+      // Import the cover art right away so the user sees it immediately;
+      // the vinyl animation + music only start once analysis begins.
+      if(selectedSongMeta.artworkUrl){
+        pendingAlbumCover = selectedSongMeta.artworkUrl;
+        albumCoverPreview.style.backgroundImage = `url(${pendingAlbumCover})`;
+        albumCoverPreview.textContent = '';
+        clearAlbumCoverBtn.style.display = 'inline';
+      }
     });
     songCandidateList.appendChild(item);
   });
 }
+
+// Shows a spinning-vinyl overlay with the album cover and loops the official
+// 30-second preview clip (reusing the shared previewAudio element so it
+// doesn't fight with the album-detail preview button) for as long as lyric
+// analysis is running. Closed via closeVinylPreview() once analysis finishes
+// or the user taps the bottom "停止分析" button.
+let vinylAutoCloseTimer = null;
+function closeVinylPreview(){
+  const overlay = document.getElementById('vinylOverlay');
+  if(overlay) overlay.remove();
+  clearTimeout(vinylAutoCloseTimer);
+  if(previewAudio){ previewAudio.pause(); previewAudio.loop = false; previewAudio.onended = null; previewAudio.ontimeupdate = null; }
+}
+function showVinylPreview(meta){
+  if(!meta) return;
+  closeVinylPreview();
+  const overlay = document.createElement('div');
+  overlay.id = 'vinylOverlay';
+  overlay.className = 'vinyl-overlay';
+  overlay.innerHTML = `
+    <div class="vinyl-box">
+      <div class="vinyl-disc-wrap">
+        <div class="vinyl-disc" id="vinylDisc">
+          ${meta.artworkUrl ? `<img class="vinyl-cover" src="${meta.artworkUrl}" alt="">` : ''}
+          <div class="vinyl-hole"></div>
+        </div>
+      </div>
+      <div class="vinyl-title">${escapeHtml(meta.title || '')}</div>
+      <div class="vinyl-artist">${escapeHtml(meta.artist || '')}</div>
+      <div class="vinyl-progress"><div class="vinyl-progress-bar" id="vinylProgressBar"></div></div>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const disc = document.getElementById('vinylDisc');
+  if(meta.previewUrl){
+    if(!previewAudio) previewAudio = new Audio();
+    previewAudio.pause();
+    previewAudio.src = meta.previewUrl;
+    previewAudio.loop = true; // keep playing throughout the whole analysis, not just 30s
+    previewAudio.currentTime = 0;
+    previewPlayingUrl = null; // vinyl preview is separate from the album-detail play button state
+    const bar = document.getElementById('vinylProgressBar');
+    previewAudio.ontimeupdate = ()=>{
+      if(bar) bar.style.width = Math.min(100, (previewAudio.currentTime / 30) * 100) + '%';
+    };
+    previewAudio.play().then(()=>{
+      if(disc) disc.classList.add('spinning');
+    }).catch(()=>{ if(disc) disc.classList.add('spinning'); /* autoplay might be blocked - still show the spin */ });
+  }else{
+    // No audio preview available - still show the spinning animation.
+    if(disc) disc.classList.add('spinning');
+  }
+}
+
+// ---- Analysis-time vinyl + stop button orchestration ----
+let analysisAborted = false;
+function startAnalysisVinyl(){
+  const meta = selectedSongMeta || (pendingAlbumCover ? {
+    title: albumNameInput.value.trim(),
+    artist: albumArtistInput.value.trim(),
+    artworkUrl: pendingAlbumCover,
+    previewUrl: null
+  } : null);
+  if(meta) showVinylPreview(meta);
+  const stopBtn = document.getElementById('stopAnalysisBtn');
+  if(stopBtn) stopBtn.style.display = 'flex';
+}
+function stopAnalysisVinyl(){
+  closeVinylPreview();
+  const stopBtn = document.getElementById('stopAnalysisBtn');
+  if(stopBtn) stopBtn.style.display = 'none';
+}
+function abortAnalysis(){
+  analysisAborted = true;
+  stopAnalysisVinyl();
+  if(lyricsStatus && lyricsStatus.style.display !== 'none') lyricsStatus.textContent = '已停止分析。';
+}
+document.getElementById('stopAnalysisBtn').addEventListener('click', abortAnalysis);
+
 
 let itunesSearchTimer = null;
 function scheduleItunesSearch(){
@@ -2982,6 +3345,7 @@ async function translateAllWords(words, lang, onProgress){
   let next = 0;
   async function runNext(){
     while(next < chunks.length){
+      if(analysisAborted) return;
       const idx = next++;
       await translateWordChunk(chunks[idx], lang, onProgress);
     }
@@ -3009,6 +3373,8 @@ document.getElementById('openLyricsForAlbumBtn').addEventListener('click', ()=>{
   document.getElementById('albumDetailView').style.display = 'none';
 });
 function closeLyricsForm(){
+  analysisAborted = true;
+  stopAnalysisVinyl();
   lyricsForm.style.display = 'none';
   if(lyricsTargetAlbumId){
     document.getElementById('albumDetailView').style.display = 'block';
@@ -3056,66 +3422,79 @@ async function analyzeLyricsText(text, lang){
   lyricsSelectRow.style.display = 'none';
   lyricsConfirmRow.style.display = 'none';
 
-  if(lang === 'ja'){
-    lyricsStatus.textContent = '交給 AI 分析日文斷詞與翻譯中…';
-    const aiWords = await extractJapaneseWordsWithAI(text);
-    if(aiWords && aiWords.length){
-      lyricsCandidates = aiWords.map(e=>({
-        word: e.word, translation: e.translation || '（沒有翻譯）', base: e.base || e.word,
-        reading: e.reading || '', sourceLine: e.sourceLine || ''
-      }));
-      renderLyricsCandidateRows();
-      lyricsStatus.textContent = `完成！取消勾選你不需要的單字，再按下方加入。`;
-      lyricsSelectRow.style.display = 'flex';
-      lyricsConfirmRow.style.display = 'flex';
-      return true;
+  // Vinyl animation + music play from the moment analysis starts until the
+  // translation finishes (or the user taps "停止分析"), then stop.
+  analysisAborted = false;
+  startAnalysisVinyl();
+  try{
+    if(lang === 'ja'){
+      lyricsStatus.textContent = '交給 AI 分析日文斷詞與翻譯中…';
+      const aiWords = await extractJapaneseWordsWithAI(text);
+      if(analysisAborted) return false;
+      if(aiWords && aiWords.length){
+        lyricsCandidates = aiWords.map(e=>({
+          word: e.word, translation: e.translation || '（沒有翻譯）', base: e.base || e.word,
+          reading: e.reading || '', sourceLine: e.sourceLine || ''
+        }));
+        renderLyricsCandidateRows();
+        lyricsStatus.textContent = `完成！取消勾選你不需要的單字，再按下方加入。`;
+        lyricsSelectRow.style.display = 'flex';
+        lyricsConfirmRow.style.display = 'flex';
+        return true;
+      }
+      lyricsStatus.textContent = 'AI 暫時無法使用，改用內建規則分析（準確度較低）…';
     }
-    lyricsStatus.textContent = 'AI 暫時無法使用，改用內建規則分析（準確度較低）…';
-  }
 
-  const words = tokenizeLyrics(text, lang);
-  if(!words.length){ showToast('沒有找到可用的新單字'); lyricsStatus.style.display = 'none'; return false; }
-  const lyricLines = text.split(/\n+/).map(l=>l.trim()).filter(Boolean);
-  function findSourceLine(word){
-    if(LATIN_LANGS.has(lang)){
-      const re = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'i');
-      for(const line of lyricLines){ if(re.test(line)) return line; }
-    }else{
-      for(const line of lyricLines){ if(line.includes(word)) return line; }
+    const words = tokenizeLyrics(text, lang);
+    if(!words.length){ showToast('沒有找到可用的新單字'); lyricsStatus.style.display = 'none'; return false; }
+    const lyricLines = text.split(/\n+/).map(l=>l.trim()).filter(Boolean);
+    function findSourceLine(word){
+      if(LATIN_LANGS.has(lang)){
+        const re = new RegExp(`\\b${word.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')}\\b`, 'i');
+        for(const line of lyricLines){ if(re.test(line)) return line; }
+      }else{
+        for(const line of lyricLines){ if(line.includes(word)) return line; }
+      }
+      return '';
     }
-    return '';
+    lyricsList.innerHTML = '';
+    lyricsCandidates = words.map(w=>({ word:w, translation:'', base:w, reading:'', sourceLine: findSourceLine(w) }));
+    lyricsStatus.textContent = `找到 ${words.length} 個單字，翻譯中… 0/${words.length}`;
+    words.forEach(w=>{
+      const row = document.createElement('div');
+      row.className = 'lyrics-item';
+      row.innerHTML = `<input type="checkbox" checked data-word="${w}"><span class="lw">${escapeHtml(w)}</span><span class="lt pending" id="lt-${w}">翻譯中…</span>`;
+      lyricsList.appendChild(row);
+    });
+    let done = 0;
+    await translateAllWords(words, lang, (word, translation, base, reading)=>{
+      if(analysisAborted) return;
+      const item = lyricsCandidates.find(c=>c.word===word);
+      if(item){
+        item.translation = translation || '（翻譯失敗，可手動編輯）';
+        item.base = base || word;
+        item.reading = reading || '';
+      }
+      const lwEl = document.querySelector(`.lyrics-item input[data-word="${word}"] + .lw`);
+      if(lwEl && item){
+        const hint = buildWordHint(word, item.base, item.reading);
+        lwEl.innerHTML = hint ? `${escapeHtml(word)}<span class="front-hint">（${escapeHtml(hint)}）</span>` : escapeHtml(word);
+      }
+      const el = document.getElementById(`lt-${word}`);
+      if(el){ el.textContent = item ? item.translation : ''; el.classList.remove('pending'); }
+      done++;
+      lyricsStatus.textContent = `找到 ${words.length} 個單字，翻譯中… ${done}/${words.length}`;
+    });
+    if(analysisAborted) return false;
+    lyricsStatus.textContent = `完成！取消勾選你不需要的單字，再按下方加入。`;
+    lyricsSelectRow.style.display = 'flex';
+    lyricsConfirmRow.style.display = 'flex';
+    return true;
+  } finally {
+    // Always stop the vinyl animation + music once analysis is done, whether
+    // it finished normally, returned early, or was aborted by the user.
+    stopAnalysisVinyl();
   }
-  lyricsList.innerHTML = '';
-  lyricsCandidates = words.map(w=>({ word:w, translation:'', base:w, reading:'', sourceLine: findSourceLine(w) }));
-  lyricsStatus.textContent = `找到 ${words.length} 個單字，翻譯中… 0/${words.length}`;
-  words.forEach(w=>{
-    const row = document.createElement('div');
-    row.className = 'lyrics-item';
-    row.innerHTML = `<input type="checkbox" checked data-word="${w}"><span class="lw">${escapeHtml(w)}</span><span class="lt pending" id="lt-${w}">翻譯中…</span>`;
-    lyricsList.appendChild(row);
-  });
-  let done = 0;
-  await translateAllWords(words, lang, (word, translation, base, reading)=>{
-    const item = lyricsCandidates.find(c=>c.word===word);
-    if(item){
-      item.translation = translation || '（翻譯失敗，可手動編輯）';
-      item.base = base || word;
-      item.reading = reading || '';
-    }
-    const lwEl = document.querySelector(`.lyrics-item input[data-word="${word}"] + .lw`);
-    if(lwEl && item){
-      const hint = buildWordHint(word, item.base, item.reading);
-      lwEl.innerHTML = hint ? `${escapeHtml(word)}<span class="front-hint">（${escapeHtml(hint)}）</span>` : escapeHtml(word);
-    }
-    const el = document.getElementById(`lt-${word}`);
-    if(el){ el.textContent = item ? item.translation : ''; el.classList.remove('pending'); }
-    done++;
-    lyricsStatus.textContent = `找到 ${words.length} 個單字，翻譯中… ${done}/${words.length}`;
-  });
-  lyricsStatus.textContent = `完成！取消勾選你不需要的單字，再按下方加入。`;
-  lyricsSelectRow.style.display = 'flex';
-  lyricsConfirmRow.style.display = 'flex';
-  return true;
 }
 
 document.getElementById('analyzeLyricsBtn').addEventListener('click', async ()=>{
@@ -3127,7 +3506,8 @@ document.getElementById('analyzeLyricsBtn').addEventListener('click', async ()=>
   await analyzeLyricsText(text, lang);
 });
 
-document.getElementById('searchLyricsBtn').addEventListener('click', async ()=>{
+document.getElementById('searchLyricsBtn').addEventListener('click', async (evt)=>{
+  const searchBtn = evt.currentTarget;
   const albumName = albumNameInput.value.trim();
   const title = selectedSongMeta ? selectedSongMeta.title : albumName;
   const artist = selectedSongMeta ? selectedSongMeta.artist : albumArtistInput.value.trim();
@@ -3143,26 +3523,39 @@ document.getElementById('searchLyricsBtn').addEventListener('click', async ()=>{
     clearAlbumCoverBtn.style.display = 'inline';
   }
 
+  setBtnLoading(searchBtn, '搜尋歌詞中…');
   songSearchStatus.style.display = 'block';
-  songSearchStatus.textContent = '搜尋歌詞中…';
-  const text = await fetchLyricsByTitle(title, artist);
-  if(!text){
-    songSearchStatus.textContent = '找不到這首歌的歌詞，請確認專輯名稱／歌手拼法是否正確（可從上方搜尋結果直接點選），或改用「手動」分頁貼上歌詞。';
-    return;
+  songSearchStatus.innerHTML = '<span class="status-spinner"></span>搜尋歌詞中…';
+  songSearchStatus.classList.add('is-loading');
+  try{
+    const text = await fetchLyricsByTitle(title, artist);
+    if(!text){
+      songSearchStatus.classList.remove('is-loading');
+      songSearchStatus.textContent = '找不到這首歌的歌詞，請確認專輯名稱／歌手拼法是否正確（可從上方搜尋結果直接點選），或改用「手動」分頁貼上歌詞。';
+      return;
+    }
+    const lang = detectLangFromText(text);
+    if(!lang){
+      songSearchStatus.classList.remove('is-loading');
+      songSearchStatus.textContent = '找到的內容看起來不是日文或韓文歌詞（可能抓到錯誤版本或無關內容），請確認上方搜尋結果選對歌曲，或改用「手動」分頁貼上正確歌詞。';
+      return;
+    }
+    songSearchStatus.innerHTML = '<span class="status-spinner"></span>找到歌詞，開始拆解單字…';
+    clearBtnLoading(searchBtn);
+    await analyzeLyricsText(text, lang);
+    songSearchStatus.classList.remove('is-loading');
+    songSearchStatus.style.display = 'none';
+  } finally {
+    clearBtnLoading(searchBtn);
   }
-  const lang = detectLangFromText(text);
-  if(!lang){
-    songSearchStatus.textContent = '找到的內容看起來不是日文或韓文歌詞（可能抓到錯誤版本或無關內容），請確認上方搜尋結果選對歌曲，或改用「手動」分頁貼上正確歌詞。';
-    return;
-  }
-  songSearchStatus.textContent = '找到歌詞，開始拆解單字…';
-  await analyzeLyricsText(text, lang);
-  songSearchStatus.style.display = 'none';
 });
 
-document.getElementById('addLyricsCardsBtn').addEventListener('click', async ()=>{
+document.getElementById('addLyricsCardsBtn').addEventListener('click', async (evt)=>{
   const checked = Array.from(lyricsList.querySelectorAll('input[type=checkbox]:checked')).map(cb=>cb.dataset.word);
   if(!checked.length){ showToast('沒有選取任何單字'); return; }
+  const addBtn = evt.currentTarget;
+  setBtnLoading(addBtn, '建立中…');
+  try{
   const lang = lyricsLangSelect.value;
   const addingToExisting = !!lyricsTargetAlbumId;
   let targetAlbum;
@@ -3238,6 +3631,9 @@ document.getElementById('addLyricsCardsBtn').addEventListener('click', async ()=
   closeLyricsForm();
   showToast(wasAddingToExisting ? `已加入 ${added} 個單字` : `已建立專輯「${targetAlbum.name}」，加入 ${added} 個單字`);
   openAlbum(targetAlbum.id);
+  } finally {
+    clearBtnLoading(addBtn);
+  }
 });
 
 /* ---- Falling star click-to-pop animation ---- */
@@ -3311,10 +3707,196 @@ if('serviceWorker' in navigator){
   }catch(e){}
 }
 
+/* ---- Notes: AI 拆解流行語 ---- */
+const NOTE_CATEGORIES = ['句尾變化', '詞語', '文法'];
+const notesInputText = document.getElementById('notesInputText');
+const notesAnalyzeBtn = document.getElementById('notesAnalyzeBtn');
+const notesAnalyzeStatus = document.getElementById('notesAnalyzeStatus');
+const notesResultCard = document.getElementById('notesResultCard');
+const notesResultList = document.getElementById('notesResultList');
+const notesSaveBtn = document.getElementById('notesSaveBtn');
+const notesDiscardBtn = document.getElementById('notesDiscardBtn');
+const notesListEl = document.getElementById('notesList');
+const emptyNotes = document.getElementById('emptyNotes');
+const notebookPage = document.getElementById('notebookPage');
+let pendingNoteItems = [];
+let activeNoteCategory = '句尾變化';
+
+function buildSlangAnalysisPrompt(text){
+  return `你是一位教學生流行語、詞語與文法用法的語言老師。請仔細閱讀下面這段文字（可能是中文、日文、韓文、英文或多語言混合），找出裡面值得學習的特殊用法，並將每一個用法分類為以下三種類別之一：
+- "句尾變化"：句尾的語氣、時態、敬語、口語縮約等變化形式（例如動詞/形容詞的句尾活用、語尾助詞、口語縮寫的句尾等）
+- "詞語"：值得學習的流行語、網路用語、迷因用語、慣用語、單字或片語
+- "文法"：文法句型、結構或固定用法（不是單一詞彙，而是一種句子結構規則）
+
+針對每一個找到的用法，請提供：
+- "category"：上面三種類別之一，字串必須完全等於 "句尾變化"、"詞語" 或 "文法" 其中一個
+- "phrase"：該用法本身，依原文出現的寫法
+- "meaning"：用繁體中文（zh-TW）簡短說明這個用法的意思、語感或使用情境
+- "example"：直接引用原文中包含該用法的那一句話或片段（只取真正需要的片段，不要整段照抄全部文字）
+
+如果文字中沒有值得記錄的用法，請回傳空陣列 []。
+請只回傳一個原始 JSON 陣列，格式如 [{"category":"...","phrase":"...","meaning":"...","example":"..."}]，不要加上 markdown 標記或任何說明文字。
+
+文字內容：
+${text}`;
+}
+
+function renderNoteResultItems(items){
+  notesResultList.innerHTML = '';
+  items.forEach((item, idx)=>{
+    const cat = NOTE_CATEGORIES.includes(item.category) ? item.category : '詞語';
+    const options = NOTE_CATEGORIES.map(c=>`<option value="${c}" ${c===cat?'selected':''}>${c}</option>`).join('');
+    const row = document.createElement('label');
+    row.className = 'notes-result-item';
+    row.innerHTML = `
+      <input type="checkbox" checked data-idx="${idx}">
+      <div class="nri-body">
+        <div class="nri-top-row">
+          <div class="nri-phrase">${escapeHtml(item.phrase || '')}</div>
+          <select class="nri-cat-select">${options}</select>
+        </div>
+        <div class="nri-meaning">${escapeHtml(item.meaning || '')}</div>
+        ${item.example ? `<div class="nri-example">「${escapeHtml(item.example)}」</div>` : ''}
+      </div>
+    `;
+    // Prevent the checkbox row's <label> from toggling the checkbox when the
+    // person is just picking a category from the dropdown.
+    row.querySelector('.nri-cat-select').addEventListener('click', e=>e.stopPropagation());
+    notesResultList.appendChild(row);
+  });
+}
+
+notesAnalyzeBtn.addEventListener('click', async (evt)=>{
+  const text = notesInputText.value.trim();
+  if(!text){ showToast('請先貼上要分析的文字'); notesInputText.focus(); return; }
+  const btn = evt.currentTarget;
+  setBtnLoading(btn, '分析中…');
+  notesResultCard.style.display = 'none';
+  notesAnalyzeStatus.style.display = 'block';
+  notesAnalyzeStatus.innerHTML = '<span class="status-spinner"></span>AI 拆解並分類用法中…';
+  notesAnalyzeStatus.classList.add('is-loading');
+  try{
+    const prompt = buildSlangAnalysisPrompt(text);
+    const parsed = await callAI(prompt);
+    const items = Array.isArray(parsed) ? parsed.filter(it => it && it.phrase) : [];
+    notesAnalyzeStatus.classList.remove('is-loading');
+    notesAnalyzeStatus.style.display = 'none';
+    if(!items.length){
+      showToast('沒有偵測到值得記錄的用法，可以換一段文字試試看');
+      return;
+    }
+    pendingNoteItems = items;
+    renderNoteResultItems(items);
+    notesResultCard.style.display = 'block';
+  } finally {
+    clearBtnLoading(btn);
+  }
+});
+
+notesDiscardBtn.addEventListener('click', ()=>{
+  notesResultCard.style.display = 'none';
+  pendingNoteItems = [];
+});
+
+// Merge one analyzed item into the notebook: if the same phrase already
+// exists under the same category (from an earlier, different article), just
+// bump its occurrence count and add the new example instead of creating a
+// duplicate entry.
+function mergeNoteItem(category, phrase, meaning, example){
+  const key = (phrase || '').trim().toLowerCase();
+  if(!key) return;
+  const now = Date.now();
+  let entry = notes.find(n => n.category === category && (n.phrase || '').trim().toLowerCase() === key);
+  if(entry){
+    entry.count = (entry.count || 1) + 1;
+    entry.lastAt = now;
+    if(!entry.meaning && meaning) entry.meaning = meaning;
+    if(example){
+      entry.examples = entry.examples || [];
+      if(entry.examples.length < 6 && !entry.examples.includes(example)){
+        entry.examples.push(example);
+      }
+    }
+  }else{
+    notes.push({
+      id: uid(), category, phrase: phrase.trim(), meaning: meaning || '',
+      examples: example ? [example] : [], count: 1, createdAt: now, lastAt: now
+    });
+  }
+}
+
+notesSaveBtn.addEventListener('click', async ()=>{
+  const rows = Array.from(notesResultList.querySelectorAll('.notes-result-item'));
+  const checkedRows = rows.filter(row => row.querySelector('input[type=checkbox]').checked);
+  if(!checkedRows.length){ showToast('請至少勾選一個項目'); return; }
+  checkedRows.forEach(row=>{
+    const idx = parseInt(row.querySelector('input[type=checkbox]').dataset.idx, 10);
+    const item = pendingNoteItems[idx];
+    if(!item) return;
+    const category = row.querySelector('.nri-cat-select').value;
+    mergeNoteItem(category, item.phrase || '', item.meaning || '', item.example || '');
+  });
+  await saveNotes(notes);
+  notesResultCard.style.display = 'none';
+  notesInputText.value = '';
+  pendingNoteItems = [];
+  showToast(`已儲存 ${checkedRows.length} 個用法到筆記本`);
+  renderNotes();
+});
+
+document.querySelectorAll('.notebook-tab').forEach(tabBtn=>{
+  tabBtn.addEventListener('click', ()=>{
+    const cat = tabBtn.dataset.cat;
+    if(cat === activeNoteCategory) return;
+    document.querySelectorAll('.notebook-tab').forEach(b=>b.classList.remove('active'));
+    tabBtn.classList.add('active');
+    activeNoteCategory = cat;
+    notebookPage.classList.add('flipping');
+    setTimeout(()=>{ renderNotes(); }, 150);
+    setTimeout(()=>{ notebookPage.classList.remove('flipping'); }, 360);
+  });
+});
+
+function renderNotes(){
+  const filtered = notes
+    .filter(n => n.category === activeNoteCategory)
+    .slice()
+    .sort((a, b) => (b.count - a.count) || (b.lastAt - a.lastAt));
+  emptyNotes.style.display = filtered.length ? 'none' : 'block';
+  notesListEl.style.display = filtered.length ? 'flex' : 'none';
+  notesListEl.innerHTML = '';
+  filtered.forEach(entry=>{
+    const card = document.createElement('div');
+    card.className = 'note-card';
+    const examplesHtml = (entry.examples || []).map(ex =>
+      `<div class="note-item-example">「${escapeHtml(ex)}」</div>`
+    ).join('');
+    card.innerHTML = `
+      <div class="note-card-header">
+        <div class="note-item-phrase">${escapeHtml(entry.phrase)}</div>
+        <span class="note-count-badge">出現 ${entry.count} 次</span>
+        <button class="note-delete-btn" data-id="${entry.id}">刪除</button>
+      </div>
+      ${entry.meaning ? `<div class="note-item-meaning">${escapeHtml(entry.meaning)}</div>` : ''}
+      ${examplesHtml}
+    `;
+    card.querySelector('.note-delete-btn').addEventListener('click', async ()=>{
+      const ok = await showConfirm('確定要刪除這則筆記嗎？');
+      if(!ok) return;
+      notes = notes.filter(n => n.id !== entry.id);
+      await saveNotes(notes);
+      renderNotes();
+    });
+    notesListEl.appendChild(card);
+  });
+}
+
+
 /* ---- Init ---- */
 (async function init(){
   cards = await loadCards();
   albums = await loadAlbums();
+  notes = await loadNotes();
   await initStore();
   const validAlbumIds = new Set(albums.map(a=>a.id));
   const cleaned = cards.filter(c => c.albumId && validAlbumIds.has(c.albumId));
@@ -3323,6 +3905,7 @@ if('serviceWorker' in navigator){
     await saveCards(cards);
   }
   render();
+  renderNotes();
 })();
 </script>
 </body>
