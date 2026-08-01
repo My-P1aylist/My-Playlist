@@ -620,6 +620,10 @@
   @media(max-width:480px){
     .logo-title{height:80px;max-width:60vw;object-fit:contain;}
     .stage{height:260px;}
+    header{flex-wrap:wrap;}
+    .header-right{align-items:stretch;margin-top:0;width:100%;}
+    .tabs{width:100%;}
+    .tabs button{flex:1;padding:7px 4px;font-size:11px;}
   }
 
   /* ====== 黑膠唱片試聽彈窗 ====== */
@@ -1053,15 +1057,15 @@
   <!-- Notes panel -->
   <div id="panelNotes" class="panel">
     <div class="notes-input-card">
-      <textarea id="notesInputText" class="notes-textarea" rows="6" placeholder="貼上歌詞、貼文、對話…等文字，AI 會幫你拆解裡面的流行語／網路用語用法"></textarea>
+      <textarea id="notesInputText" class="notes-textarea" rows="6" placeholder="在這裡寫下你自己整理的筆記，一則一行或一段都可以（例如：句尾變化、詞語、文法的觀察），AI 只會幫你分類整理，不會自己編內容"></textarea>
       <div class="notes-input-actions">
-        <button class="btn primary" id="notesAnalyzeBtn">分析並拆解流行語</button>
+        <button class="btn primary" id="notesAnalyzeBtn">整理並分類我的筆記</button>
       </div>
       <div class="lyrics-status" id="notesAnalyzeStatus" style="display:none;"></div>
     </div>
 
     <div id="notesResultCard" class="notes-result-card" style="display:none;">
-      <div class="notes-result-title">拆解結果（勾選要存入筆記的項目）</div>
+      <div class="notes-result-title">整理結果（勾選要存入筆記本的項目）</div>
       <div id="notesResultList" class="notes-result-list"></div>
       <div class="notes-input-actions">
         <button class="btn primary" id="notesSaveBtn">儲存至筆記</button>
@@ -3707,7 +3711,7 @@ if('serviceWorker' in navigator){
   }catch(e){}
 }
 
-/* ---- Notes: AI 拆解流行語 ---- */
+/* ---- Notes: AI 整理並分類使用者自寫的筆記 ---- */
 const NOTE_CATEGORIES = ['句尾變化', '詞語', '文法'];
 const notesInputText = document.getElementById('notesInputText');
 const notesAnalyzeBtn = document.getElementById('notesAnalyzeBtn');
@@ -3723,21 +3727,21 @@ let pendingNoteItems = [];
 let activeNoteCategory = '句尾變化';
 
 function buildSlangAnalysisPrompt(text){
-  return `你是一位教學生流行語、詞語與文法用法的語言老師。請仔細閱讀下面這段文字（可能是中文、日文、韓文、英文或多語言混合），找出裡面值得學習的特殊用法，並將每一個用法分類為以下三種類別之一：
-- "句尾變化"：句尾的語氣、時態、敬語、口語縮約等變化形式（例如動詞/形容詞的句尾活用、語尾助詞、口語縮寫的句尾等）
-- "詞語"：值得學習的流行語、網路用語、迷因用語、慣用語、單字或片語
-- "文法"：文法句型、結構或固定用法（不是單一詞彙，而是一種句子結構規則）
+  return `你是一位幫學生整理筆記的助教。以下是使用者「自己已經寫好」的語言學習筆記，內容可能一行一則，也可能一段一則，主題可能是句尾變化、詞語（流行語／單字／片語）或文法規則的觀察記錄。
 
-針對每一個找到的用法，請提供：
-- "category"：上面三種類別之一，字串必須完全等於 "句尾變化"、"詞語" 或 "文法" 其中一個
-- "phrase"：該用法本身，依原文出現的寫法
-- "meaning"：用繁體中文（zh-TW）簡短說明這個用法的意思、語感或使用情境
-- "example"：直接引用原文中包含該用法的那一句話或片段（只取真正需要的片段，不要整段照抄全部文字）
+你的工作只是把使用者原本寫的每一則筆記拆開並分類，絕對不要自己發明、擴寫或補充使用者沒有寫過的內容。針對每一則筆記，請提供：
+- "category"：判斷這一則最符合下面三種類別中的哪一種，字串必須完全等於 "句尾變化"、"詞語" 或 "文法" 其中一個
+  - "句尾變化"：句尾的語氣、時態、敬語、口語縮約等變化形式
+  - "詞語"：流行語、網路用語、慣用語、單字或片語
+  - "文法"：文法句型、結構或固定用法
+- "phrase"：這一則筆記提到的用法本身，依使用者原本的寫法照抄
+- "meaning"：使用者原本寫的意思說明；如果使用者沒有寫意思，就留空字串 ""
+- "example"：使用者原本附上的例句；如果沒有，就留空字串 ""
 
-如果文字中沒有值得記錄的用法，請回傳空陣列 []。
+如果使用者只寫了一則筆記，就回傳只有一個元素的陣列；如果完全無法辨識出任何筆記內容，回傳空陣列 []。
 請只回傳一個原始 JSON 陣列，格式如 [{"category":"...","phrase":"...","meaning":"...","example":"..."}]，不要加上 markdown 標記或任何說明文字。
 
-文字內容：
+使用者的筆記：
 ${text}`;
 }
 
@@ -3768,12 +3772,12 @@ function renderNoteResultItems(items){
 
 notesAnalyzeBtn.addEventListener('click', async (evt)=>{
   const text = notesInputText.value.trim();
-  if(!text){ showToast('請先貼上要分析的文字'); notesInputText.focus(); return; }
+  if(!text){ showToast('請先寫下你的筆記內容'); notesInputText.focus(); return; }
   const btn = evt.currentTarget;
-  setBtnLoading(btn, '分析中…');
+  setBtnLoading(btn, '整理中…');
   notesResultCard.style.display = 'none';
   notesAnalyzeStatus.style.display = 'block';
-  notesAnalyzeStatus.innerHTML = '<span class="status-spinner"></span>AI 拆解並分類用法中…';
+  notesAnalyzeStatus.innerHTML = '<span class="status-spinner"></span>AI 整理並分類筆記中…';
   notesAnalyzeStatus.classList.add('is-loading');
   try{
     const prompt = buildSlangAnalysisPrompt(text);
@@ -3782,7 +3786,7 @@ notesAnalyzeBtn.addEventListener('click', async (evt)=>{
     notesAnalyzeStatus.classList.remove('is-loading');
     notesAnalyzeStatus.style.display = 'none';
     if(!items.length){
-      showToast('沒有偵測到值得記錄的用法，可以換一段文字試試看');
+      showToast('沒有辨識出筆記內容，可以換個寫法試試看');
       return;
     }
     pendingNoteItems = items;
